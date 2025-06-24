@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificate Download Portal</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(
+            rgba(255, 255, 255, 0.9),
+            rgba(255, 255, 255, 0.9)
+          ),
+          url("https://www.tsdcmumbai.in/images/logo/tsdc-logo-final.png");
+        background-size: 200px 200px;
+        background-repeat: repeat;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 100%;
+        max-width: 800px;
+        margin-top: 50px;
+      }
+
+      h1 {
+        color: #4a5568;
+        text-align: center;
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(45deg, #2563eb, #1d4ed8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .search-container {
+        position: relative;
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(37, 99, 235, 0.1);
+        border-radius: 15px;
+        border: 2px solid rgba(37, 99, 235, 0.2);
+      }
+
+      #searchInput {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      #searchInput:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        transform: translateY(-2px);
+      }
+
+      #searchBtn {
+        padding: 15px 30px;
+        background: linear-gradient(45deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+      }
+
+      #searchBtn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+      }
+
+      #searchBtn:active {
+        transform: translateY(-1px);
+      }
+
+      .results-container {
+        margin-top: 30px;
+      }
+
+      .student-card {
+        background: white;
+        padding: 20px;
+        margin: 15px 0;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border-left: 5px solid #2563eb;
+        transition: all 0.3s ease;
+        opacity: 0;
+        animation: fadeInUp 0.5s ease forwards;
+      }
+
+      .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .student-name {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 8px;
+      }
+
+      .student-details {
+        color: #718096;
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .download-btn {
+        background: linear-gradient(45deg, #48bb78, #38a169);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(72, 187, 120, 0.3);
+      }
+
+      .download-btn:disabled {
+        background: #a0aec0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .download-btn:disabled:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .no-results {
+        text-align: center;
+        color: #718096;
+        font-size: 1.2rem;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 15px;
+        margin-top: 20px;
+      }
+
+      .suggestions {
+        position: absolute;
+        top: 100%;
+        left: 20px;
+        right: 130px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .suggestion-item {
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f7fafc;
+      }
+
+      .suggestion-item:hover {
+        background: #2563eb;
+        color: white;
+      }
+
+      .suggestion-item:last-child {
+        border-bottom: none;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px;
+          margin-top: 20px;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .search-container {
+          flex-direction: column;
+        }
+
+        #searchBtn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Download Your Certificate Here</h1>
+
+      <div class="search-container">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Enter student name..."
+          autocomplete="off"
+        />
+        <button id="searchBtn">Search</button>
+        <div class="suggestions hidden" id="suggestions"></div>
+      </div>
+
+      <div class="results-container" id="resultsContainer">
+        <!-- Results will be displayed here -->
+      </div>
+    </div>
+
+    <script>
+      // Student data array
+      const students = [
+        "Aayush Gajjar",
+        "Aditi Sah",
+        "Aditi Singh",
+        "Aditya Singh",
+        "Aman Yadav",
+        "Apurva Gaur",
+        "Aryan Tarun Jha",
+        "Bhaskar Nemani",
+        "Bhumi Oza",
+        "Chaitanyanandi Yogendra Suratkar",
+        "Dipesh Kapoor",
+        "Divij Sudhir Sovilkar",
+        "Divyanshu Anand Tiwari",
+        "Durga Ashok Mahto",
+        "Harsh K Gupta",
+        "Kalpana Aparbal Gupta",
+        "Mishra Kashish Swatantra",
+        "Mishra Prashant Pravindrakumar",
+        "Naresh Kumar Jitarwal",
+        "Neeti Parmar",
+        "Nitin Maurya",
+        "Omini Verma",
+        "Pallavi Pathak",
+        "Panvi Sandeep Kale",
+        "Prajapati Simran Sanjay",
+        "Prathamesh Vishwakarma",
+        "Priyanka Jain",
+        "Riya Vinodkumar Sharma",
+        "Rushabh Singh",
+        "Rushil Pandita",
+        "Rutvik Surve",
+        "Sai Nitin Pansare",
+        "Saurabh Sharma",
+        "Shravani Patil",
+        "Shreepada Nagvekar",
+        "Shriyank Singh",
+        "Singh Aanchal Rakesh",
+        "Singh Sudiksha Bharat",
+        "Swayam Hitesh Patel",
+        "Tanisshqa Engglay",
+        "Thakur Bhumi Rajkumar",
+        "Tiwari Vaishanvi Santosh",
+        "Trisha Singh",
+        "Uttam Digambar Nile",
+        "Vedant Sandeep Kasalkar",
+        "Yadav Komal Rajesh Kumar",
+        "Yash Hitesh Kansara",
+        "Zishan Isaq Khan",
+      ];
+
+      const searchInput = document.getElementById("searchInput");
+      const searchBtn = document.getElementById("searchBtn");
+      const resultsContainer = document.getElementById("resultsContainer");
+      const suggestionsContainer = document.getElementById("suggestions");
+
+      function displayResults(results) {
+        resultsContainer.innerHTML = "";
+
+        if (results.length === 0) {
+          resultsContainer.innerHTML =
+            '<div class="no-results">No students found matching your search.</div>';
+          return;
+        }
+
+        results.forEach((student, index) => {
+          const studentCard = document.createElement("div");
+          studentCard.className = "student-card";
+          studentCard.style.animationDelay = `${index * 0.1}s`;
+
+          studentCard.innerHTML = `
+                    <div class="student-name">${student}</div>
+                    <button class="download-btn" onclick="downloadCertificate('${student}')">
+                        Download Certificate
+                    </button>
+                `;
+
+          resultsContainer.appendChild(studentCard);
+        });
+      }
+
+      function searchStudents() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+
+        if (searchTerm === "") {
+          resultsContainer.innerHTML =
+            '<div class="no-results">Please enter a student name to search.</div>';
+          return;
+        }
+
+        const filteredStudents = students.filter((student) =>
+          student.toLowerCase().includes(searchTerm)
+        );
+
+        displayResults(filteredStudents);
+      }
+
+      async function downloadCertificate(name) {
+        try {
+          // Show loading state
+          const downloadBtn = event.target;
+          const originalText = downloadBtn.textContent;
+          downloadBtn.textContent = "Downloading...";
+          downloadBtn.disabled = true;
+
+          // Call backend API to get certificate using GET request
+          const response = await fetch(
+            `http://localhost:3000/certificate?name=${encodeURIComponent(name)}`
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          // Get the blob from response
+          const blob = await response.blob();
+
+          // Create download link
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${name.replace(/\s+/g, "_")}_Certificate.jpg`;
+          document.body.appendChild(a);
+          a.click();
+
+          // Cleanup
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          // Reset button
+          downloadBtn.textContent = originalText;
+          downloadBtn.disabled = false;
+        } catch (error) {
+          console.error("Error downloading certificate:", error);
+
+          // Reset button
+          const downloadBtn = event.target;
+          downloadBtn.textContent = "Download Certificate";
+          downloadBtn.disabled = false;
+
+          // Show error message
+          alert(
+            "Failed to download certificate. Please try again or contact support."
+          );
+        }
+      }
+
+      function showSuggestions(query) {
+        if (query.length === 0) {
+          suggestionsContainer.classList.add("hidden");
+          return;
+        }
+
+        const filteredStudents = students.filter((student) =>
+          student.toLowerCase().includes(query.toLowerCase())
+        );
+
+        if (filteredStudents.length === 0) {
+          suggestionsContainer.classList.add("hidden");
+          return;
+        }
+
+        suggestionsContainer.innerHTML = "";
+        filteredStudents.slice(0, 5).forEach((student) => {
+          const suggestionItem = document.createElement("div");
+          suggestionItem.className = "suggestion-item";
+          suggestionItem.textContent = student;
+          suggestionItem.addEventListener("click", () => {
+            searchInput.value = student;
+            suggestionsContainer.classList.add("hidden");
+            searchStudents();
+          });
+          suggestionsContainer.appendChild(suggestionItem);
+        });
+
+        suggestionsContainer.classList.remove("hidden");
+      }
+
+      function hideSuggestions() {
+        setTimeout(() => {
+          suggestionsContainer.classList.add("hidden");
+        }, 200);
+      }
+      // Event listeners
+      searchBtn.addEventListener("click", searchStudents);
+
+      searchInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+          suggestionsContainer.classList.add("hidden");
+          searchStudents();
+        }
+      });
+
+      // Show suggestions as user types
+      searchInput.addEventListener("input", function () {
+        const query = this.value.trim();
+        showSuggestions(query);
+
+        if (query === "") {
+          resultsContainer.innerHTML = "";
+        }
+      });
+
+      // Hide suggestions when input loses focus
+      searchInput.addEventListener("blur", hideSuggestions);
+
+      // Show suggestions when input gains focus (if there's text)
+      searchInput.addEventListener("focus", function () {
+        if (this.value.trim() !== "") {
+          showSuggestions(this.value.trim());
+        }
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest(".search-container")) {
+          suggestionsContainer.classList.add("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>
