@@ -368,7 +368,7 @@
 
           // Call backend API to get certificate using GET request
           const response = await fetch(
-            `http://localhost:3000/certificate?name=${encodeURIComponent(name)}`
+            `https://aayush-college.onrender.com/certificate?name=${encodeURIComponent(name)}`
           );
 
           if (!response.ok) {
